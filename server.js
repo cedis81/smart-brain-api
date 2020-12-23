@@ -47,10 +47,6 @@ app.post('/signin', (req, res) => {
 
 app.post('/register', (req, res) => {
   const { email, name, password } = req.body;
-  bcrypt.hash(password, null, null, function(err, hash) {
-    console.log(hash);
-      // Store hash in your password DB.
-  });
   database.users.push({
     id: '125',
     name: name,
