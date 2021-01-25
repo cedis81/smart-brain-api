@@ -14,8 +14,6 @@ const database = knex({
   }
 });
 
-database.select('*').from('users');
-
 const app = express();
 
 app.use(bodyParser.json());
@@ -39,14 +37,17 @@ app.post('/signin', (req, res) => {
 
 app.post('/register', (req, res) => {
   const { email, name, password } = req.body;
-  database.users.push({
-    id: '125',
-    name: name,
+  database('users')
+    .returning('*')
+    .insert({
     email: email,
-    entries: 0,
+    name: name,
     joined: new Date()
   })
-  res.json(database.users[database.users.length-1]);
+  .then(user => {
+    res.json(user[0])
+  })
+  .catch(err => res.status(400).json('Unable to register.'))
 })
 
 app.get('/profile/:id', (req, res) => {
