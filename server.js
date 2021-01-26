@@ -37,29 +37,46 @@ app.post('/signin', (req, res) => {
 
 app.post('/register', (req, res) => {
   const { email, name, password } = req.body;
-  database('users')
-    .returning('*')
-    .insert({
-    email: email,
-    name: name,
-    joined: new Date()
-  })
-    .then(user => {
-      res.json(user[0])
+  // bcrypt.hash(password, null, null, function(err, hash) {
+  //   console.log(err);
+  //   console.log(hash);
+  // });
+  const hash = bcrypt.hashSync(password);
+  database.transaction(trx => {
+    trx.insert({
+      hash: hash,
+      email: email
     })
-    .catch(err => res.status(400).json('Unable to register.'))
+    .into('login')
+    .returning('email')
+    .then(loginEmail => {
+      return trx('users')
+        .returning('*')
+        .insert({
+          email: loginEmail[0],
+          name: name,
+          joined: new Date()
+        })
+        .then(user => {
+          res.json(user[0])
+        })
+    })
+    .then(trx.commit)
+    .catch(trx.rollback)
+  })
+  .catch(err => res.status(400).json('Unable to register.'))
 })
 
 app.get('/profile/:id', (req, res) => {
   const { id } = req.params;
   database.select('*').from('users').where({id})
     .then(user => {
-      if(user.length) {
-        res.json(user[0])
-      } else {
-        res.status(400).json('Not found.')
-      }
-    })
+        if(user.length) {
+          res.json(user[0])
+        } else {
+          res.status(400).json('Not found.')
+        }
+      })
     .catch(err => res.status(400).json('Error retrieving user.'))
 })
 
@@ -71,8 +88,6 @@ app.put('/image', (req, res) => {
     .then(entries => res.json(entries[0]))
     .catch(err => res.status(400).json('Unable to get entries.'))
 })
-
-
 
 // // Load hash from your password DB.
 // bcrypt.compare("bacon", hash, function(err, res) {
