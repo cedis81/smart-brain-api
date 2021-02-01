@@ -1,4 +1,3 @@
-
 const handleImage = (req, res, database) => {
   const { id } = req.body;
   database('users').where('id', '=', id)
@@ -9,5 +8,5 @@ const handleImage = (req, res, database) => {
 }
 
 module.exports = {
-  handleImage: handleImage
+  handleImage
 };

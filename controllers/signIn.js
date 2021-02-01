@@ -1,4 +1,3 @@
-
 const handleSignIn = (req, res, database, bcrypt) => {
   const { email, name, password } = req.body;
   database.select('email', 'hash').from('login')
@@ -19,5 +18,5 @@ const handleSignIn = (req, res, database, bcrypt) => {
 }
 
 module.exports = {
-  handleSignIn: handleSignIn
+  handleSignIn
 };
